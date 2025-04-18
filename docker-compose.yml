@@ -1,0 +1,21 @@
+
+services:
+  frontend:
+    build:
+      context: ./frontend-main
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:8000
+
+  backend:
+    build:
+      context: ./backend-main
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend-main/src/csv:/app/src/csv 
