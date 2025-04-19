@@ -22,7 +22,7 @@ def convert_to_csv(image_bytes: bytes, output_path: Path):
     # Здесь должна быть логика конвертации изображения в CSV
     # Пока что создаём пустой CSV-файл
     with open(output_path, 'w', encoding='utf-8') as f:
-        f.write("mock,data\n")
+        f.write("номер поезда,приоритет\nX969,5\nV965,22\n")
     return output_path
 
 @app.get("/")
