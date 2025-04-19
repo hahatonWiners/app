@@ -140,7 +140,6 @@ const UploadTable = ({ onUpload, activeTab }) => {
 
       const data = await uploadService.uploadFile(zipFile, params);
       console.log('Успешно загружено:', data);
-      alert('Файлы успешно загружены!');
       
       if (isZipMode) {
         onUpload && onUpload(files, params);
@@ -153,7 +152,6 @@ const UploadTable = ({ onUpload, activeTab }) => {
       
     } catch (error) {
       console.error('Ошибка при загрузке:', error);
-      alert('Произошла ошибка при загрузке файлов');
       setIsUploading(false);
       setUploadProgress(0);
     }
