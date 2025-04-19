@@ -6,28 +6,41 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
-  background-color: white;
+  background-color: var(--surface);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
   margin-top: 20px;
 }
 
 .result-view h2 {
-  color: #333;
+  color: var(--text-color);
   margin-bottom: 15px;
   font-size: 1.5rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.result-view h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  height: 2px;
+  background-color: var(--primary-color);
 }
 
 .result-content {
-  background-color: #1e1e1e;
+  background-color: var(--surface-dark);
   border-radius: 8px;
   padding: 1rem;
   max-height: 400px;
   overflow-y: auto;
+  border: 1px solid var(--border-color);
 }
 
 .result-content pre {
-  color: #fff;
+  color: var(--text-color);
   font-family: monospace;
   font-size: 14px;
   margin: 0;
@@ -43,38 +56,38 @@
 }
 
 .download-button {
-  background-color: #4CAF50;
-  color: white;
+  background-color: var(--success-color);
+  color: var(--light-text);
   border: none;
   padding: 12px 24px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 16px;
-  transition: all 0.3s ease;
+  transition: var(--transition);
 }
 
 .download-button:hover {
-  background-color: #45a049;
+  background-color: var(--success-color);
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+  box-shadow: var(--shadow);
 }
 
 .return-button {
-  background-color: #6C63FF;
-  color: white;
+  background-color: var(--primary-color);
+  color: var(--light-text);
   border: none;
   padding: 12px 24px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 16px;
-  transition: all 0.3s ease;
+  transition: var(--transition);
   font-weight: 500;
 }
 
 .return-button:hover {
-  background-color: #5B54D6;
+  background-color: var(--hover-color);
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(108, 99, 255, 0.2);
+  box-shadow: var(--shadow);
 }
 
 .return-button:active,
@@ -86,5 +99,22 @@
 .return-button:focus,
 .download-button:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.3);
+  box-shadow: 0 0 0 3px rgba(255, 59, 59, 0.3);
+}
+
+@media (max-width: 768px) {
+  .result-view {
+    padding: 15px;
+    margin-top: 15px;
+  }
+  
+  .button-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .download-button,
+  .return-button {
+    width: 100%;
+  }
 } 
