@@ -23,12 +23,13 @@ app.add_middleware(
 )
 
 # Моковая функция для конвертации изображений в CSV
-def convert_to_csv(image_bytes: bytes, output_path: Path):
+def convert_to_csv(image_bytes: bytes):
     # Здесь должна быть логика конвертации изображения в CSV
     # Пока что создаём пустой CSV-файл
-    with open(output_path, 'w', encoding='utf-8') as f:
-        f.write("номер поезда,приоритет\nX969,5\nV965,22\n")
-    return output_path
+    # with open(output_path, 'w', encoding='utf-8') as f:
+    #     f.write("номер поезда,приоритет\nX969,5\nV965,22\n")
+    # return output_path
+    pass
 
 def parce_csv(input_path, output_dir, sep=';'):
     """
@@ -102,6 +103,13 @@ async def upload_data(a: int, b: int, c: int, d: int,  file: UploadFile = File(.
                 filename = Path(file_info.filename)
                 file_ext = filename.suffix.lower()
                 
+                # Validate file extension for single file
+                if file_ext not in ['.csv', '.jpg', '.jpeg', '.png']:
+                    raise HTTPException(
+                        status_code=400, 
+                        detail=f"Неподдерживаемый тип файла: {file_ext}. Поддерживаются только .csv, .jpg, .jpeg, .png"
+                    )
+                
                 with zf.open(file_info) as extracted_file:
                     file_bytes = extracted_file.read()
                     
@@ -120,14 +128,22 @@ async def upload_data(a: int, b: int, c: int, d: int,  file: UploadFile = File(.
                         else:
                             # If parsing failed, keep the original file
                             print("CSV parsing failed, keeping original file")
+                    elif file_ext in ['.jpg', '.jpeg', '.png']:
+                        # Convert image to CSV
+                        convert_to_csv(file_bytes)
             else:
-                # Process multiple files as before
+                # Process multiple files
                 for zip_info in file_list:
                     if zip_info.is_dir():
                         continue  # Пропускаем директории
 
                     filename = Path(zip_info.filename)
                     file_ext = filename.suffix.lower()
+
+                    # Validate file extension for each file
+                    if file_ext not in ['.csv', '.jpg', '.jpeg', '.png']:
+                        print(f"Пропуск файла с неподдерживаемым расширением: {filename}")
+                        continue
 
                     with zf.open(zip_info) as extracted_file:
                         file_bytes = extracted_file.read()
@@ -142,9 +158,13 @@ async def upload_data(a: int, b: int, c: int, d: int,  file: UploadFile = File(.
                             output_path = tempdir / filename.name
                             with open(output_path, 'wb') as out_file:
                                 out_file.write(file_bytes)
-                        else:
-                            # Пропускаем файлы с неподдерживаемыми расширениями
-                            continue
+        
+        # Check if any files were processed
+        if not any(tempdir.iterdir()):
+            raise HTTPException(
+                status_code=400,
+                detail="Не найдено файлов с поддерживаемыми расширениями (.csv, .jpg, .jpeg, .png)"
+            )
         
         output = calculate(str(tempdir), a, b, c, d)
         output.to_csv(tempdir / "result.csv")
