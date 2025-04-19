@@ -14,12 +14,14 @@ const UploadPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [log, setLog] = useState('');
   const [progress, setProgress] = useState(0);
-  const [result, setResult] = useState(null);
+  const [done, setDone] = useState(false);
+  const [uploadData, setUploadData] = useState(null);
 
-  const handleWebSocketMessage = useWebSocketHandler(setLog, setProgress, setResult);
+  const handleWebSocketMessage = useWebSocketHandler(setLog, setProgress, setDone);
   const { connect, sendMessage } = useWebSocket(WS_URL, handleWebSocketMessage);
 
-  const handleUpload = (files, params) => {
+  const handleUpload = (files, params, data) => {
+    setUploadData(data);
     setIsProcessing(true);
     setLog('Starting process...\n');
     connect();
@@ -41,7 +43,7 @@ const UploadPage = () => {
       ) : (
         <>
           <ProcessingLog log={log} progress={progress} />
-          {result && <ResultView result={result} />}
+          {done && <ResultView uploadData={uploadData} />}
         </>
       )}
     </div>

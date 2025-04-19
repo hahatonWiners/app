@@ -132,19 +132,19 @@ const UploadTable = ({ onUpload, activeTab }) => {
       }
 
       const params = {
-        a: parseInt(aValue || '1'),
-        b: parseInt(bValue || '1'),
-        c: parseInt(cValue || '1'),
-        d: parseInt(dValue || '1')
+        a: parseFloat(aValue || '1'),
+        b: parseFloat(bValue || '1'),
+        c: parseFloat(cValue || '1'),
+        d: parseFloat(dValue || '1')
       };
 
       const data = await uploadService.uploadFile(zipFile, params);
       console.log('Успешно загружено:', data);
       
       if (isZipMode) {
-        onUpload && onUpload(files, params);
+        onUpload && onUpload(files, params, data);
       } else {
-        onUpload && onUpload([{ name: 'files.zip' }], params);
+        onUpload && onUpload([{ name: 'files.zip' }], params, data);
       }
       
       setIsUploading(false);
