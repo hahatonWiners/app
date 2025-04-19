@@ -12,6 +12,16 @@ export const getResult = async () => {
   }
 };
 
+export const getCsvData = async (tempdir) => {
+  try {
+    const response = await axios.post(`${API_URL}/get_csv_data`, { tempdir });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching CSV data:', error);
+    throw error;
+  }
+};
+
 export const downloadFile = async (data) => {
   try {
     const response = await axios.post(`${API_URL}/download`, data, {

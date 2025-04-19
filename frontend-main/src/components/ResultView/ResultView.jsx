@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import './ResultView.css';
 import { downloadFile, deleteTemp } from '../../services/api';
+import CSVTable from '../CsvTable/CsvTable';
 
 const ResultView = ({uploadData }) => {
   useEffect(() => {
@@ -44,10 +45,7 @@ const ResultView = ({uploadData }) => {
 
   return (
     <div className="result-view">
-      {/* <h2>Результат обработки:</h2>
-      <div className="result-content">
-        <pre>{JSON.stringify(result, null, 2)}</pre>
-      </div> */}
+      <CSVTable tempdir={uploadData?.tempdir} />
       <div className="button-group">
         <button className="download-button" onClick={handleDownload}>
           Скачать результат
