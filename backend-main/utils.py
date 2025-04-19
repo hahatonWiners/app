@@ -92,7 +92,7 @@ class CustomCategoricalSampling(Sampling):
 
 
 
-def calculate(data_folder):
+def calculate(data_folder, a, b, c, d):
 
     containers = list(map(lambda name: name.split('.csv')[0], [f for f in os.listdir(data_folder) if f.endswith('.csv')]))
 
@@ -125,7 +125,7 @@ def calculate(data_folder):
 
     F_norm = scaler.fit_transform(F)
 
-    weights = np.array([0.1, 1, 0.1, 0.1])
+    weights = np.array([a, b, c, d])
 
     weighted_sums = np.dot(F_norm, weights)
 
