@@ -31,7 +31,7 @@ def convert_to_csv(image_bytes: bytes):
     # return output_path
     pass
 
-def parce_csv(input_path, output_dir, sep=';'):
+def parce_csv(input_path, output_dir, sep=','):
     """
     Parse a CSV file and create separate CSV files for each container.
     
@@ -83,7 +83,7 @@ def read_root():
     return {"message": "Приложение успешно запущено"}
     
 @app.post("/upload")
-async def upload_data(a: int, b: int, c: int, d: int,  file: UploadFile = File(...)):
+async def upload_data(a: float, b: float, c: float, d: float,  file: UploadFile = File(...)):
     # Проверяем, что загружен именно ZIP-файл
     if file.content_type not in ["application/zip", "application/x-zip-compressed"]:
         raise HTTPException(status_code=400, detail="Неверный тип файла. Поддерживаются только ZIP-архивы.")
