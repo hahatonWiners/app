@@ -30,6 +30,53 @@ def convert_to_csv(image_bytes: bytes, output_path: Path):
         f.write("номер поезда,приоритет\nX969,5\nV965,22\n")
     return output_path
 
+def parce_csv(input_path, output_dir, sep=';'):
+    """
+    Parse a CSV file and create separate CSV files for each container.
+    
+    Args:
+        input_path (Path): Path to the input CSV file
+        output_dir (Path): Directory to save the output CSV files
+        sep (str): CSV separator character
+    """
+    try:
+        # Read the CSV file
+        data = pd.read_csv(input_path, sep=sep)
+        
+        # Check if required columns exist
+        if 'container_id' not in data.columns:
+            raise ValueError("CSV file must contain a 'container_id' column")
+            
+        # Get unique container IDs
+        containers = data['container_id'].unique()
+        
+        # Set container_id as index for easier filtering
+        data = data.set_index('container_id')
+        
+        # Create output directory if it doesn't exist
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Process each container
+        for cont in containers:
+            # Get data for this container
+            cont_data = data.loc[cont]
+            
+            # Create result DataFrame with required columns
+            result_df = pd.DataFrame({
+                'номер поезда': cont_data.index,
+                'приоритет': cont_data.values
+            })
+            
+            # Save to CSV
+            output_file = output_dir / f"{cont}.csv"
+            result_df.to_csv(output_file, index=False)
+            
+        return True
+    except Exception as e:
+        print(f"Error parsing CSV: {str(e)}")
+        return False
+
 @app.get("/")
 def read_root():
     return {"message": "Приложение успешно запущено"}
@@ -41,35 +88,65 @@ async def upload_data(a: int, b: int, c: int, d: int,  file: UploadFile = File(.
         raise HTTPException(status_code=400, detail="Неверный тип файла. Поддерживаются только ZIP-архивы.")
 
     tempdir = Path(tempfile.mkdtemp())
+    input_dir = Path(tempfile.mkdtemp())
     try:
         # Сброс позиции на начало файла и распаковка
         file.file.seek(0)
         with zipfile.ZipFile(file.file) as zf:
-            for zip_info in zf.infolist():
-                if zip_info.is_dir():
-                    continue  # Пропускаем директории
-
-                filename = Path(zip_info.filename)
+            file_list = zf.infolist()
+            
+            # Check if there's only one file in the zip
+            if len(file_list) == 1:
+                # Extract the single file
+                file_info = file_list[0]
+                filename = Path(file_info.filename)
                 file_ext = filename.suffix.lower()
-
-                with zf.open(zip_info) as extracted_file:
+                
+                with zf.open(file_info) as extracted_file:
                     file_bytes = extracted_file.read()
-
-                    if file_ext in [".jpg", ".jpeg", ".png"]:
-                        # Конвертируем изображение в CSV
-                        csv_filename = filename.stem + ".csv"
-                        output_path = tempdir / csv_filename
-                        convert_to_csv(file_bytes, output_path)
-                    elif file_ext == ".csv":
-                        # Сохраняем CSV-файл напрямую
-                        output_path = tempdir / filename.name
-                        with open(output_path, 'wb') as out_file:
+                    
+                    if file_ext == ".csv":
+                        # Save the CSV file temporarily
+                        input_path = input_dir / filename.name
+                        temp_csv_path = tempdir / filename.name
+                        with open(input_path, 'wb') as out_file:
                             out_file.write(file_bytes)
-                    else:
-                        # Пропускаем файлы с неподдерживаемыми расширениями
-                        continue
+                        
+                        # Parse the CSV file
+                        if parce_csv(input_path, tempdir):
+                            # If parsing was successful, we don't need the original file
+                            shutil.rmtree(input_dir)
+                            print(os.listdir(tempdir))
+                        else:
+                            # If parsing failed, keep the original file
+                            print("CSV parsing failed, keeping original file")
+            else:
+                # Process multiple files as before
+                for zip_info in file_list:
+                    if zip_info.is_dir():
+                        continue  # Пропускаем директории
+
+                    filename = Path(zip_info.filename)
+                    file_ext = filename.suffix.lower()
+
+                    with zf.open(zip_info) as extracted_file:
+                        file_bytes = extracted_file.read()
+
+                        if file_ext in [".jpg", ".jpeg", ".png"]:
+                            # Конвертируем изображение в CSV
+                            csv_filename = filename.stem + ".csv"
+                            output_path = tempdir / csv_filename
+                            convert_to_csv(file_bytes, output_path)
+                        elif file_ext == ".csv":
+                            # Сохраняем CSV-файл напрямую
+                            output_path = tempdir / filename.name
+                            with open(output_path, 'wb') as out_file:
+                                out_file.write(file_bytes)
+                        else:
+                            # Пропускаем файлы с неподдерживаемыми расширениями
+                            continue
         
-        output = calculate(str(tempdir))
+        output = calculate(str(tempdir), a, b, c, d)
         output.to_csv(tempdir / "result.csv")
 
     except zipfile.BadZipFile:
