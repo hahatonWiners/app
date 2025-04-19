@@ -1,11 +1,12 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import zipfile
 from pathlib import Path
 import tempfile
 import shutil
 import os
+import pandas as pd
 
 from utils import calculate
 
@@ -122,3 +123,33 @@ async def send(websocket: WebSocket):
     await websocket.accept()
     for i in range(1, 1001):
         await websocket.send_json({"message": "test_text", "progress": str(i*0.1)})
+
+@app.post("/get_csv_data")
+async def get_csv_data(data: dict):
+    try:
+        if not data or "tempdir" not in data:
+            raise HTTPException(status_code=400, detail="Missing tempdir parameter")
+            
+        temp_dir = data["tempdir"]
+        file_path = Path(temp_dir) / "result.csv"
+        
+        if not os.path.exists(temp_dir):
+            raise HTTPException(status_code=404, detail=f"Temporary directory not found: {temp_dir}")
+            
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail=f"Result file not found at: {file_path}")
+            
+        # Read CSV file using pandas
+        df = pd.read_csv(file_path)
+        
+        # Convert DataFrame to list of dictionaries for JSON response
+        data = df.to_dict(orient='records')
+        headers = df.columns.tolist()
+        
+        return JSONResponse(content={
+            "headers": headers,
+            "data": data
+        })
+    except Exception as e:
+        print(f"Error in get_csv_data endpoint: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
