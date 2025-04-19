@@ -95,11 +95,12 @@ class CustomCategoricalSampling(Sampling):
 def calculate(data_folder):
 
     containers = list(map(lambda name: name.split('.csv')[0], [f for f in os.listdir(data_folder) if f.endswith('.csv')]))
+
     trains = []
     data: dict[str: pd.DataFrame] = {}
 
     for cont_name in containers:
-        data[cont_name] = pd.read_csv(data_folder + cont_name + '.csv')
+        data[cont_name] = pd.read_csv(data_folder + "/" + cont_name + '.csv')
         trains.append(list(range(len(data[cont_name]['номер поезда']))))
 
     algorithm = NSGA2(
