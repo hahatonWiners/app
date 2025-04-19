@@ -12,6 +12,7 @@ const UploadTable = ({ onUpload, activeTab }) => {
   const [bValue, setBValue] = useState('1');
   const [cValue, setCValue] = useState('1');
   const [dValue, setDValue] = useState('1');
+  const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef(null);
 
   const isZipMode = activeTab === 'zip';
@@ -120,7 +121,7 @@ const UploadTable = ({ onUpload, activeTab }) => {
       alert('Пожалуйста, выберите файлы');
       return;
     }
-
+    setIsLoading(true);
     try {
       let zipFile;
       
@@ -132,10 +133,10 @@ const UploadTable = ({ onUpload, activeTab }) => {
       }
 
       const params = {
-        a: parseFloat(aValue || '1'),
-        b: parseFloat(bValue || '1'),
-        c: parseFloat(cValue || '1'),
-        d: parseFloat(dValue || '1')
+        a: parseFloat(aValue),
+        b: parseFloat(bValue),
+        c: parseFloat(cValue),
+        d: parseFloat(dValue)
       };
 
       const data = await uploadService.uploadFile(zipFile, params);
@@ -154,6 +155,8 @@ const UploadTable = ({ onUpload, activeTab }) => {
       console.error('Ошибка при загрузке:', error);
       setIsUploading(false);
       setUploadProgress(0);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -176,7 +179,7 @@ const UploadTable = ({ onUpload, activeTab }) => {
   const handleNumberInput = (e, type) => {
     const value = e.target.value;
     if (value === '' || /^\d+$/.test(value)) {
-      const setValue = value === '' ? '1' : value; // Устанавливаем 1 если поле пустое
+      const setValue = value;
       switch(type) {
         case 'a':
           setAValue(setValue);
@@ -320,10 +323,10 @@ const UploadTable = ({ onUpload, activeTab }) => {
 
       <button 
         className="submit-button"
-        disabled={files.length === 0 || isUploading}
+        disabled={files.length === 0 || isUploading || isLoading}
         onClick={handleSubmit}
       >
-        {isUploading ? 'Создание архива...' : 'Отправить'}
+        {isLoading ? 'Загрузка...' : 'Отправить'}
       </button>
     </div>
   );
