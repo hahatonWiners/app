@@ -1,26 +1,36 @@
 .header {
-  background-color: #fff;
+  background-color: var(--surface);
+  padding: 1rem 2rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 1rem 0;
-  position: sticky;
+  position: fixed;
+  width: 100%;
   top: 0;
-  z-index: 100;
+  z-index: 1000;
+  transition: transform 0.3s ease-in-out;
+}
+
+.header.hidden {
+  transform: translateY(-100%);
 }
 
 .header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .logo {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #333;
+  color: var(--primary-color);
   text-decoration: none;
+  transition: var(--transition);
+}
+
+.logo:hover {
+  color: var(--hover-color);
 }
 
 .nav {
@@ -30,27 +40,44 @@
 }
 
 .nav-link {
-  color: #666;
+  color: var(--text-color);
   text-decoration: none;
   font-size: 1rem;
-  transition: color 0.3s ease;
+  transition: var(--transition);
 }
 
 .nav-link:hover {
-  color: #333;
+  color: var(--primary-color);
 }
 
-.upload-button {
-  background-color: #007bff;
-  color: white;
+.main-button {
+  background-color: var(--primary-color);
+  color: var(--light-text);
   text-decoration: none;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 4px;
   font-size: 1rem;
-  transition: background-color 0.3s ease;
+  transition: var(--transition);
+  border: none;
+  cursor: pointer;
 }
 
-.upload-button:hover {
-  background-color: #0056b3;
-  color: white;
+.main-button:hover {
+  background-color: var(--hover-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 1rem;
+  }
+  
+  .nav {
+    gap: 1rem;
+  }
+  
+  .main-button {
+    padding: 0.5rem 1rem;
+  }
 } 
